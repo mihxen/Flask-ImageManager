@@ -3,7 +3,7 @@
 from flask import Blueprint, redirect, request
 
 from ImageForm import ImageForm
-from Image import Image, FlaskImage, FlaskModelImage
+from Image import Image, FlaskModelImage
 
 
 def load_img(image_id):
