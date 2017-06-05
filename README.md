@@ -2,9 +2,9 @@
 Easy way to manage your images in Flask application.
 
 ### Requires
-- Jinja
 - Flask
 - Flask-WTF
+- Pillow (PIL) package for image manipulations
 - Definition of a "IMAGE_EXTENSION" variable in a configuration file (for example to 'png')
 - Definition of a "BASEDIR" variable in a configuration file which contains a path to the folder with static files
 
