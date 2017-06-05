@@ -10,7 +10,7 @@ from wtforms import FileField, HiddenField, SubmitField
 from wtforms.validators import Optional
 from werkzeug.utils import secure_filename
 
-from Image import FlaskImage
+from Image import FlaskImage, load_file_by_url
 
 
 def allowed_file(filename):
