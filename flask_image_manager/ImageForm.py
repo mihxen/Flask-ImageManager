@@ -4,7 +4,7 @@ import os.path
 import json
 
 from flask import url_for, Markup, flash, abort, request, current_app
-from flask.ext.wtf import Form
+from flask_wtf import Form
 from wtforms.fields.html5 import URLField
 from wtforms import FileField, HiddenField, SubmitField
 from wtforms.validators import Optional
