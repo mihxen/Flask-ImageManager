@@ -13,6 +13,6 @@ setup(
     platforms='any',
     zip_safe=False,
     include_package_data=True,
-    install_requires=['Flask', 'Flask-WTF'],
+    install_requires=['Flask', 'Flask-WTF', 'pillow'],
     packages=find_packages()
 )
