@@ -23,9 +23,9 @@ class ImageManager(object):
             raise Exception(
                 'IMAGE_EXTENSION must be set in application configuration')
 
-        if 'BASEDIR' not in app.config:
+        if 'STATIC_BASEDIR' not in app.config:
             raise Exception(
-                'BASEDIR must be set in application configuration')
+                'STATIC_BASEDIR must be set in application configuration')
 
         if 'IMAGE_SIZES' not in app.config:
             app.config['IMAGE_SIZES'] = {

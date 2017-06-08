@@ -6,7 +6,7 @@ import json
 from flask import url_for, Markup, flash, abort, request, current_app
 from flask_wtf import Form
 from wtforms.fields.html5 import URLField
-from wtforms import FileField, HiddenField, SubmitField
+from wtforms import FileField, HiddenField, SubmitField, BooleanField
 from wtforms.validators import Optional
 from werkzeug.utils import secure_filename
 
@@ -28,6 +28,7 @@ class ImageForm(Form):
     foldername = HiddenField()
     filename = HiddenField()
     sizes = HiddenField()
+    file_required = BooleanField(default=False)
 
     def __init__(self, image, sizes=[], *args, **kwargs):
         Form.__init__(self, *args, **kwargs)
@@ -42,22 +43,24 @@ class ImageForm(Form):
                 abort(404)
             self.image = self.image()
 
-        if self.foldername.data is None:
+        if not self.foldername.data:
             self.foldername.data = kwargs.get('foldername')
-        if self.filename.data is None:
+        if not self.filename.data:
             self.filename.data = kwargs.get('filename') or self.image.name
-        if self.sizes.data is None:
+        if not self.sizes.data:
             self.sizes.data = json.dumps(sizes or [])
+        if self.file_required.data is False:
+            self.file_required.data = bool(kwargs.get('file_required'))
 
         self.file_path = self.foldername.data\
             if self.foldername.data is not None else ''
         if self.filename.data is None:
             self.filename.data = self.determine_filename()
 
+
         self.file_path = os.path.join(self.file_path, self.filename.data)
         self.file_is_loaded = self.image.is_present(self.file_path)
 
-        #self.file_required = bool(kwargs.get('file_required'))
 
     def determine_filename(self):
         files = os.listdir(self.image.get_img_path(self.file_path))
@@ -74,14 +77,19 @@ class ImageForm(Form):
     def validate(self):
         if not Form.validate(self):
             return False
-        #img_manager = ImgManager(self.path, no_sizes=self.no_sizes)
         sizes = json.loads(self.sizes.data)
-        if not self.url.data and not self.file.data and self.file_is_loaded:
-            if 1:  # self.file_required:
-                flash('No file is provided')
-                return False
-            self.image.delete_file(self.file_path)
-            return True
+        if not self.url.data and not self.file.data:
+            print self.file_required.data
+            if self.file_required.data:
+                if not self.file_is_loaded:
+                    flash('No file is provided')
+                    return False
+                else:
+                    return True
+            else:
+                self.image.delete_file(self.file_path)
+                flash('File has been deleted successfully')
+                return True
 
         if self.url.data and allowed_file(self.url.data):
             try:
@@ -107,13 +115,20 @@ class ImageForm(Form):
         return True
 
     def __call__(self, submit="Change photo", **kwargs):
+        no_form = kwargs.get('no_form') if hasattr(kwargs, 'no_form') else type(self) != ImageForm
+        s = '%s' % (
+            self.hidden_tag() + self.file(**kwargs) +
+            self.url(**kwargs) + self.foldername() +
+            self.filename() + self.sizes() +
+            self.file_required(style="display:none;") +
+            (self.submit(value=submit, **kwargs) if not no_form else '')) +\
+            (u'<font color="red">File is present on a server</font>'
+                if self.file_is_loaded else '')
+        if no_form:
+            return Markup(s)
         return Markup(u'<form action="%s" method="post"'
                       u'enctype="multipart/form-data">%s</form>' % (
                           url_for('imagemanager.load_image',
-                                  image_id=self.image_id, next=request.path),
-                          self.hidden_tag() + self.file(**kwargs) +
-                          self.url(**kwargs) + self.foldername() +
-                          self.filename() + self.sizes() +
-                          self.submit(value=submit, **kwargs)) +
-                      (u'<font color="red">File is present on a server</font>'
-                       if self.file_is_loaded else ''))
+                                  image_id=self.image_id,
+                                  next=kwargs.get('next') or request.path),
+                          s))

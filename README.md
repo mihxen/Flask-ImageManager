@@ -6,7 +6,7 @@ Easy way to manage your images in Flask application.
 - Flask-WTF
 - Pillow (PIL) package for image manipulations
 - Definition of a "IMAGE_EXTENSION" variable in a configuration file (for example to 'png')
-- Definition of a "BASEDIR" variable in a configuration file which contains a path to the folder with static files
+- Definition of a "STATIC_BASEDIR" variable in a configuration file which contains a path to the folder with static files
 
 ### Other configuration variables
 - "IMAGE_SIZES" is a python dictionary of available image labels and widths {'lg': 800,}
@@ -34,7 +34,7 @@ app = Flask(__name__)
 
 # set config variables
 app.config['IMAGE_EXTENSION'] = "jpg"
-app.config['BASEDIR'] = "path/to/static/folder"
+app.config['STATIC_BASEDIR'] = "path/to/static/folder"
 
 # Initialize the extension
 ImageManager(app)

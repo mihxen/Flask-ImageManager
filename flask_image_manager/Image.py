@@ -18,10 +18,10 @@ hdr = {
     'Connection': 'keep-alive'}
 
 image_html_template =\
-    '''<img src="{{src}}" class="{{kwargs.class}}" style="{{kwargs.style}}"'''\
-    ''' onerror="{{ ("this.onerror=null;this.src='" + default + "';") if '''\
-    '''default else ''}}{{ kwargs.onerror }}" alt="{{ kwargs.alt }}" '''\
-    '''width="{{ kwargs.width }}">'''
+    '''<img src="{{src}}" id="{{kwargs.id}}" class="{{kwargs.class}}"'''\
+    ''' onerror="{{ ("this.onerror=null;this.src='" + default + "';") if'''\
+    ''' default else ''}}{{ kwargs.onerror }}" alt="{{ kwargs.alt }}"'''\
+    ''' width="{{ kwargs.width }}" style="{{kwargs.style}}">'''
 
 
 def load_file_by_url(url):
@@ -58,7 +58,7 @@ class Image(object):
         return get_img_pathname(os.path.join(self.path, name), size)
 
     def get_img_abs_path(self, *args):
-        return current_app.config['BASEDIR'] + self.get_img_path(*args)
+        return current_app.config['STATIC_BASEDIR'] + self.get_img_path(*args)
 
     def save_file(self, file, name=None, sizes=[]):
         name = self.__set_name(name)
@@ -77,6 +77,10 @@ class Image(object):
 
     def save_file_by_url(self, url, *args, **kwargs):
         self.save_file(load_file_by_url(url), *args, **kwargs)
+
+    def save_file_by_path(self, path, *args, **kwargs):
+        with open(path) as file:
+            self.save_file(file, *args, **kwargs)
 
     def delete_file(self, name=None):
         name = self.__set_name(name)
@@ -120,4 +124,9 @@ def FlaskModelImage(image_id, path, name_fun, **kwargs):
             super(ClosureImage, self).__init__(image_id, path, name, **kwargs)
 
     FlaskImage.present_images[image_id] = ClosureImage
-    return property(lambda self: ClosureImage(name_fun(self)))
+    def foo(self):
+        try:
+            return name_fun(self)
+        except:
+            return None
+    return property(lambda self: ClosureImage(foo(self)))
